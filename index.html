@@ -271,6 +271,43 @@
 </style>
 </head>
 <body>
+<!-- ===== 暫時密碼閘門（前端遮罩，非真正的資安防護） ===== -->
+<div id="gate" style="position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#f6f1e7;font-family:system-ui,-apple-system,'PingFang TC',sans-serif;padding:16px">
+  <form id="gateForm" style="background:#fff;border:1px solid #e4dccb;border-radius:16px;padding:32px 28px;width:100%;max-width:340px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.08)">
+    <div style="font-size:34px">🔒</div>
+    <h2 style="margin:8px 0 4px;font-size:20px;color:#2b2620">請輸入密碼</h2>
+    <p style="margin:0 0 18px;font-size:13px;color:#7a7267">餐飲數據後台示範</p>
+    <input id="gatePw" type="password" inputmode="numeric" autocomplete="off" autofocus placeholder="密碼" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #d8cfbc;border-radius:10px;font-size:16px;text-align:center;outline:none">
+    <button type="submit" style="margin-top:12px;width:100%;padding:12px;border:0;border-radius:999px;background:#ec7d43;color:#fff;font-size:15px;font-weight:600;cursor:pointer">進入</button>
+    <div id="gateErr" style="min-height:20px;margin-top:10px;font-size:13px;color:#c0392b"></div>
+  </form>
+</div>
+<script>
+(function(){
+  var H='f76043a74ec33b6aefbb289050faf7aa8d482095477397e3e63345125d49f527';
+  var g=document.getElementById('gate');
+  function open(){ g.remove(); document.documentElement.style.overflow=''; }
+  try{ if(sessionStorage.getItem('gate-ok')===H){ open(); return; } }catch(e){}
+  document.documentElement.style.overflow='hidden';
+  function sha(t){
+    if(window.crypto&&crypto.subtle){
+      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){
+        return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+      });
+    }
+    return Promise.resolve('');
+  }
+  document.getElementById('gateForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=document.getElementById('gatePw').value;
+    sha(v).then(function(h){
+      if(h===H){ try{sessionStorage.setItem('gate-ok',H)}catch(e){} open(); }
+      else{ document.getElementById('gateErr').textContent='密碼不正確，請再試一次'; document.getElementById('gatePw').select(); }
+    });
+  });
+})();
+</script>
+
 <canvas id="bg"></canvas>
 
 <div class="app">
